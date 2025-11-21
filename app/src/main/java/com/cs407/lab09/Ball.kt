@@ -23,7 +23,7 @@ class Ball(
     private var isFirstUpdate = true
 
     init {
-        // TODO: Call reset()
+        reset()
     }
 
     /**
@@ -38,6 +38,18 @@ class Ball(
             return
         }
 
+        accX = xAcc
+        accY = yAcc
+
+        // Update velocity
+        velocityX += accX * dT
+        velocityY += accY * dT
+
+        // Update position
+        posX += velocityX * dT
+        posY += velocityY * dT
+
+        checkBoundaries()
     }
 
     /**
@@ -46,8 +58,25 @@ class Ball(
      * boundary should be set to 0.
      */
     fun checkBoundaries() {
-        // TODO: implement the checkBoundaries function
-        // (Check all 4 walls: left, right, top, bottom)
+        if (posX < 0) {
+            posX = 0f
+            velocityX = 0f
+            accX = 0f
+        } else if (posX > backgroundWidth - ballSize) {
+            posX = backgroundWidth - ballSize
+            velocityX = 0f
+            accX = 0f
+        }
+
+        if (posY < 0) {
+            posY = 0f
+            velocityY = 0f
+            accY = 0f
+        } else if (posY > backgroundHeight - ballSize) {
+            posY = backgroundHeight - ballSize
+            velocityY = 0f
+            accY = 0f
+        }
     }
 
     /**
@@ -55,7 +84,12 @@ class Ball(
      * velocity and acceleration.
      */
     fun reset() {
-        // TODO: implement the reset function
-        // (Reset posX, posY, velocityX, velocityY, accX, accY, isFirstUpdate)
+        posX = backgroundWidth / 2 - ballSize / 2
+        posY = backgroundHeight / 2 - ballSize / 2
+        velocityX = 0f
+        velocityY = 0f
+        accX = 0f
+        accY = 0f
+        isFirstUpdate = true
     }
 }

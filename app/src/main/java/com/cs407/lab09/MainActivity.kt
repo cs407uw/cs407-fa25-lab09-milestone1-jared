@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -62,14 +61,13 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun GameScreen(viewModel: BallViewModel) {
-    // TODO: Initialize the sensorManager
+    val context = LocalContext.current
     val sensorManager = remember {
-        // ... getSystemService ...
+        context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     }
 
-    // TODO: Get the gravitySensor
     val gravitySensor = remember {
-        // ... getDefaultSensor ...
+        sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
     }
 
     // This effect runs when the composable enters the screen
@@ -77,9 +75,8 @@ fun GameScreen(viewModel: BallViewModel) {
     DisposableEffect(sensorManager, gravitySensor) {
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
-                // TODO: Pass the sensor event to the ViewModel
                 event?.let {
-                    // ...
+                    viewModel.onSensorDataChanged(it)
                 }
             }
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -87,18 +84,13 @@ fun GameScreen(viewModel: BallViewModel) {
             }
         }
 
-        // TODO: Register the sensor listener
-        // (Don't forget to add a null check for gravitySensor!)
         if (gravitySensor != null) {
-            // ... sensorManager.registerListener ...
+            sensorManager.registerListener(listener, gravitySensor, SensorManager.SENSOR_DELAY_GAME)
         }
 
-        // onDispose is called when the composable leaves the screen
         onDispose {
-            // TODO: Unregister the sensor listener
-            // (Don't forget to add a null check for gravitySensor!)
             if (gravitySensor != null) {
-                // ... sensorManager.unregisterListener ...
+                sensorManager.unregisterListener(listener)
             }
         }
     }
@@ -108,7 +100,7 @@ fun GameScreen(viewModel: BallViewModel) {
         // 1. The Reset Button
         Button(
             onClick = {
-                // TODO: Call the reset function on the ViewModel
+                viewModel.reset()
             },
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
@@ -121,12 +113,7 @@ fun GameScreen(viewModel: BallViewModel) {
         val ballSize = 50.dp
         val ballSizePx = with(LocalDensity.current) { ballSize.toPx() }
 
-        // TODO: Collect the ball's position from the ViewModel
-        // val ballPosition by viewModel.ballPosition.collectAsStateWithLifecycle()
-
-        // Placeholder, remove when TODO is done:
-        val ballPosition = Offset.Zero
-
+        val ballPosition by viewModel.ballPosition.collectAsStateWithLifecycle()
 
         Box(
             modifier = Modifier
@@ -137,8 +124,7 @@ fun GameScreen(viewModel: BallViewModel) {
                     contentScale = ContentScale.FillBounds
                 )
                 .onSizeChanged { size ->
-                    // TODO: Tell the ViewModel the size of the field
-                    // viewModel.initBall(...)
+                    viewModel.initBall(size.width.toFloat(), size.height.toFloat(), ballSizePx)
                 }
         ) {
             // 3. The Ball
@@ -148,8 +134,6 @@ fun GameScreen(viewModel: BallViewModel) {
                 modifier = Modifier
                     .size(ballSize)
                     .offset {
-                        // TODO: Use the collected ballPosition to set the offset
-                        // Hint: You need to convert Float to Int
                         IntOffset(
                             x = ballPosition.x.roundToInt(),
                             y = ballPosition.y.roundToInt()
