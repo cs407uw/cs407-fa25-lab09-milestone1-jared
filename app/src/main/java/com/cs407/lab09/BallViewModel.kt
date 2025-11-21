@@ -40,7 +40,8 @@ class BallViewModel : ViewModel() {
                 val NS2S = 1.0f / 1000000000.0f
                 val dT = (event.timestamp - lastTimestamp) * NS2S
 
-                currentBall.updatePositionAndVelocity(xAcc = -event.values[0], yAcc = event.values[1], dT = dT)
+                val speedMultiplier = 2f
+                currentBall.updatePositionAndVelocity(xAcc = -event.values[0] * speedMultiplier, yAcc = event.values[1] * speedMultiplier, dT = dT)
 
                 _ballPosition.update { Offset(currentBall.posX, currentBall.posY) }
             }
